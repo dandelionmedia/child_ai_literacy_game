@@ -52,7 +52,7 @@ const STAGES = [
     id: 's1', no: 1, icon: '🤖', color: '#2ee6d6', btn: 'cyan',
     title: 'AI일까 아닐까?', sub: '① AI가 무엇일까?',
     desc: 'AI가 숨어 있는 물건을 찾아라! AI는 어떤 프로그램일까?',
-    badge: { ico: '🧠', name: '예측기계 박사' }, time: 15,
+    badge: { ico: '🧠', name: '예측기계 박사' }, time: 25,
     qs: [
       { type: 'ox', emoji: '📺', q: '유튜브가 내가 좋아할 만한 영상을 추천해 줘요.', a: true, labels: ['AI예요', 'AI 아니에요'],
         exp: '내가 본 영상들을 많이 보고 배워서, 내가 좋아할 영상을 “예측”해요. 그래서 AI예요!' },
@@ -83,7 +83,7 @@ const STAGES = [
     id: 's2', no: 2, icon: '⚖️', color: '#9b6bff', btn: 'purple',
     title: '좋은 점 vs 걱정되는 점', sub: '② AI가 우리에게 어떤 영향을?',
     desc: 'AI 덕분에 좋아지는 것과 조심해야 할 것을 나눠 보자!',
-    badge: { ico: '🔭', name: '미래 생각왕' }, time: 15,
+    badge: { ico: '🔭', name: '미래 생각왕' }, time: 25,
     qs: [
       { type: 'choice', emoji: '📚', q: '모르는 단어를 쉽게 설명해 줘요.', a: 0,
         opts: [{ t: '👍 좋은 점', c: 'green' }, { t: '🤔 걱정되는 점', c: 'orange' }],
@@ -118,7 +118,7 @@ const STAGES = [
     id: 's3', no: 3, icon: '🚦', color: '#3ddc84', btn: 'green',
     title: 'OK? STOP?', sub: '③ AI를 올바르게 쓰려면?',
     desc: '초록불이면 OK, 빨간불이면 STOP! 상황을 판정해 보자!',
-    badge: { ico: '🛡️', name: '약속 지킴이' }, time: 15,
+    badge: { ico: '🛡️', name: '약속 지킴이' }, time: 25,
     qs: [
       { type: 'choice', emoji: '📖', q: '독후감을 AI가 쓴 그대로 낸다.', a: 1,
         opts: [{ t: '🟢 OK', c: 'green' }, { t: '🔴 STOP', c: 'red' }],
@@ -156,7 +156,7 @@ const STAGES = [
     id: 's4', no: 4, icon: '🔍', color: '#ffd23f', btn: 'yellow',
     title: '돋보기 탐정', sub: '④ AI가 만든 것 구분하기',
     desc: '돋보기를 들고 AI 그림의 수상한 단서를 찾아라!',
-    badge: { ico: '🕵️', name: 'AI 탐정' }, time: 18,
+    badge: { ico: '🕵️', name: 'AI 탐정' }, time: 28,
     qs: [
       { type: 'choice', art: ART_HAND, q: '이 그림, 어디가 수상할까요?', hint: '돋보기 관찰법: 손가락·귀·안경을 살펴봐요!', a: 0, shuffle: true,
         opts: ['손가락 개수가 이상해요 (6개!)', '손 색깔이 살구색이에요', '하늘에 해가 떠 있어요'],
@@ -164,7 +164,7 @@ const STAGES = [
       { type: 'choice', art: ART_SIGN, q: '이 가게 그림에서 수상한 단서는?', a: 0, shuffle: true,
         opts: ['간판 글자가 뭉개져서 읽을 수 없어요', '문이 갈색이에요', '창문이 하나 있어요'],
         exp: 'AI는 글자를 잘 못 그릴 때가 많아요. 간판 글자가 뭉개져 있으면 의심해 봐요!' },
-      { type: 'pick', emoji: '🔍', q: 'AI가 만든 그림일 수 있는 단서를 모두 골라요!', time: 30,
+      { type: 'pick', emoji: '🔍', q: 'AI가 만든 그림일 수 있는 단서를 모두 골라요!', time: 40,
         opts: ['손가락 개수가 이상해요', '글자·간판이 뭉개져 있어요', '너무 매끈하고 완벽해서 어색해요', '‘AI 생성’ 표시나 워터마크가 있어요', '하늘이 파란색이에요', '강아지가 귀엽게 웃고 있어요'],
         ans: [0, 1, 2, 3],
         exp: '돋보기 관찰법 4가지: ① 손가락·귀·안경 ② 뭉개진 글자 ③ 너무 매끈한 어색함 ④ AI 생성 표시·워터마크!' },
@@ -184,7 +184,7 @@ const STAGES = [
     id: 's5', no: 5, icon: '📰', color: '#ff4d8d', btn: 'pink',
     title: '팩트체크 뉴스룸', sub: '⑤ 유튜브·SNS는 다 진짜일까?',
     desc: '수상한 뉴스를 판정하고 팩트체크 3단계를 완성하라!',
-    badge: { ico: '✅', name: '팩트체커' }, time: 18,
+    badge: { ico: '✅', name: '팩트체커' }, time: 28,
     qs: [
       { type: 'choice', q: '이 뉴스, 어떻게 판정할까요?', a: 1,
         news: { title: '“내일부터 전국 초등학교 숙제 없어진다!!!”', meta: '출처: 없음 · 날짜: 없음' },
@@ -202,7 +202,7 @@ const STAGES = [
         news: { title: '“충격! 바나나 먹으면 하루 만에 키 10cm!!! 지금 바로 공유하세요”', meta: '출처: 없음 · 조회수 100만' },
         opts: [{ t: '✅ 진짜 같아요', c: 'green' }, { t: '❌ 가짜 같아요', c: 'red' }, { t: '⚠️ 사기 주의', c: 'orange' }],
         exp: '너무 신기한 소식일수록 멈추고 확인! 조회수가 많다고 진짜는 아니에요.' },
-      { type: 'order', emoji: '✋', q: '팩트체크 3단계! 순서대로 눌러 보세요.', time: 20,
+      { type: 'order', emoji: '✋', q: '팩트체크 3단계! 순서대로 눌러 보세요.', time: 30,
         items: ['☝️ 누가?', '✌️ 언제?', '🤟 다른 곳에도?'],
         exp: '누가? → 언제? → 다른 곳에도? 손가락 세 개를 펼치며 외쳐 봐요!' },
       { type: 'choice', emoji: '☝️', q: '팩트체크 1단계 “누가?”에서는 무엇을 확인할까요?', a: 0, shuffle: true,
@@ -237,7 +237,7 @@ const BOSS = {
   id: 'boss', no: 6, icon: '👾', color: '#ff9f3d', btn: 'orange', boss: true,
   title: '최종 보스: 스피드 퀴즈', sub: '1부 전체 복습 · 12문제 랜덤!',
   desc: '모든 스테이지에서 랜덤으로 나오는 스피드 퀴즈! 시간은 짧고 점수는 크다!',
-  badge: { ico: '🏆', name: 'AI리터러시 챔피언' }, time: 12
+  badge: { ico: '🏆', name: 'AI리터러시 챔피언' }, time: 20
 };
 const ALL_STAGES = [...STAGES, BOSS];
 
