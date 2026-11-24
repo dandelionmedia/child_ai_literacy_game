@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>AI 탐정 게임 아레나 | 행현초 5학년 AI리터러시 복습 게임</title>
+  <meta name="description" content="친절한유성쌤과 함께 배운 AI리터러시 1부 내용을 게임으로 신나게 복습해요! AI일까 아닐까, OK? STOP?, 돋보기 탐정, 팩트체크 3단계까지.">
+  <meta name="theme-color" content="#140f3a">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@500;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- 상단 HUD 바 -->
+  <header class="topbar">
+    <div class="topbar__brand">🎮 <span>AI 탐정 아레나</span></div>
+    <div class="topbar__stats">
+      <div class="chip chip--gold" title="총점">🪙 <b id="hudTotal">0</b></div>
+      <div class="chip chip--star" title="모은 별">⭐ <b id="hudStars">0</b>/18</div>
+      <button class="chip chip--btn" id="muteBtn" aria-label="효과음 켜기/끄기">🔊</button>
+    </div>
+  </header>
+
+  <!-- 히어로 -->
+  <section class="hero" id="top">
+    <div class="hero__grid" aria-hidden="true"></div>
+    <div class="hero__floaters" aria-hidden="true">
+      <span>🤖</span><span>🔍</span><span>⭐</span><span>🕹️</span><span>🧠</span><span>🛡️</span><span>📰</span><span>✨</span>
+    </div>
+    <div class="hero__inner">
+      <p class="hero__badge">서울 행현초등학교 5학년 5반 · 1부 복습 대작전</p>
+      <h1 class="hero__title">
+        <span class="neon neon--cyan">AI 탐정</span>
+        <span class="neon neon--pink">게임 아레나</span>
+      </h1>
+      <p class="hero__lead">친절한유성쌤과 1부에서 배운 <b>AI 리터러시</b>,<br>이제 게임으로 확인해 볼까요? 🔥</p>
+
+      <div class="player-card">
+        <label for="nickInput" class="player-card__label">🎫 플레이어 별명</label>
+        <div class="player-card__row">
+          <input id="nickInput" type="text" maxlength="10" placeholder="예) 번개탐정 ⚡" autocomplete="off">
+          <button class="btn3d btn3d--yellow" id="startBtn">게임 시작! ▶</button>
+        </div>
+        <p class="player-card__tip">🔒 진짜 이름 말고 <b>별명</b>을 써요! (AI 약속 1번: 내 정보는 비밀!)</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 한 줄 메시지 전광판 -->
+  <div class="marquee" aria-label="오늘의 핵심 메시지">
+    <div class="marquee__track">
+      <span>🤖 AI는 똑똑한 예측 기계, 마지막 판단은 나! &nbsp;★&nbsp; 🔍 팩트체크 3단계: 누가? 언제? 다른 곳에도? &nbsp;★&nbsp; 🛡️ 숙제는 내가 주인공, AI는 도우미! &nbsp;★&nbsp;</span>
+      <span>🤖 AI는 똑똑한 예측 기계, 마지막 판단은 나! &nbsp;★&nbsp; 🔍 팩트체크 3단계: 누가? 언제? 다른 곳에도? &nbsp;★&nbsp; 🛡️ 숙제는 내가 주인공, AI는 도우미! &nbsp;★&nbsp;</span>
+    </div>
+  </div>
+
+  <main>
+    <!-- 스테이지 맵 -->
+    <section class="section" id="stages">
+      <h2 class="section__title"><span>🗺️</span> 스테이지 선택</h2>
+      <p class="section__desc">스테이지를 깨면 <b>별 ⭐</b>과 <b>배지 🏅</b>를 얻어요. 별 3개를 모두 모아 보세요!</p>
+      <div class="stage-grid" id="stageGrid"><!-- JS로 생성 --></div>
+    </section>
+
+    <!-- 게임 방법 -->
+    <section class="section" id="howto">
+      <h2 class="section__title"><span>📖</span> 게임 방법</h2>
+      <div class="howto-grid">
+        <div class="howto-card"><div class="howto-card__num">1</div><div class="howto-card__ico">👆</div><h3>정답 버튼 누르기</h3><p>문제를 잘 읽고 정답이라고 생각하는 버튼을 꾹! 눌러요.</p></div>
+        <div class="howto-card"><div class="howto-card__num">2</div><div class="howto-card__ico">⏱️</div><h3>시간 안에 풀기</h3><p>빨리 맞히면 <b>보너스 점수</b>! 연속으로 맞히면 <b>🔥콤보</b>가 터져요.</p></div>
+        <div class="howto-card"><div class="howto-card__num">3</div><div class="howto-card__ico">💡</div><h3>해설 꼭 읽기</h3><p>틀려도 괜찮아요! 해설을 읽으면 진짜 <b>AI 탐정</b>이 돼요.</p></div>
+      </div>
+    </section>
+
+    <!-- 다 같이 외쳐요 -->
+    <section class="section" id="shout">
+      <h2 class="section__title"><span>📣</span> 다 같이 외쳐요!</h2>
+      <div class="shout-grid">
+        <div class="shout-card shout-card--cyan">
+          <h3>🔍 팩트체크 3단계</h3>
+          <ol class="fact-steps">
+            <li><b>☝️ 누가?</b><span>누가 만들었나? 믿을 만한 곳인가?</span></li>
+            <li><b>✌️ 언제?</b><span>날짜가 있나? 예전 소식은 아닌가?</span></li>
+            <li><b>🤟 다른 곳에도?</b><span>뉴스·공식 홈페이지에도 나오나?</span></li>
+          </ol>
+          <p class="shout-card__foot">공유 버튼은 <b>확인한 다음에!</b></p>
+        </div>
+        <div class="shout-card shout-card--pink">
+          <h3>🛡️ 나의 AI 약속 5가지</h3>
+          <ul class="promise-list" id="promiseList">
+            <li><button class="promise" data-i="0"><span class="promise__n">1</span>내 이름·주소·전화번호·학교는 <b>비밀!</b></button></li>
+            <li><button class="promise" data-i="1"><span class="promise__n">2</span>AI 답은 <b>한 번 더 확인!</b></button></li>
+            <li><button class="promise" data-i="2"><span class="promise__n">3</span>숙제는 <b>내가 주인공</b>, AI는 도우미!</button></li>
+            <li><button class="promise" data-i="3"><span class="promise__n">4</span>친구 얼굴·목소리는 <b>허락 없이 쓰지 않기!</b></button></li>
+            <li><button class="promise" data-i="4"><span class="promise__n">5</span>이상하거나 무서운 내용은 <b>어른께 말하기!</b></button></li>
+          </ul>
+          <p class="shout-card__foot">약속을 눌러서 <b>도장 쾅!</b> 찍어 봐요</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 배지 컬렉션 -->
+    <section class="section" id="badges">
+      <h2 class="section__title"><span>🏅</span> 나의 배지 컬렉션</h2>
+      <p class="section__desc">별 2개 이상으로 스테이지를 깨면 배지를 받아요!</p>
+      <div class="badge-grid" id="badgeGrid"><!-- JS로 생성 --></div>
+      <div class="reset-wrap"><button class="btn3d btn3d--ghost btn3d--sm" id="resetBtn">🔄 기록 지우고 처음부터</button></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p class="footer__msg">“AI는 똑똑한 도구지만, <b>판단과 책임은 나에게</b> 있어요!”</p>
+    <p>AI콘텐츠마케팅연구소 유쌤클래스 · 친절한유성쌤 김유성</p>
+    <p class="footer__small">문제 속 뉴스·상황은 모두 <b>수업용 가상 자료</b>예요.</p>
+  </footer>
+
+  <!-- 게임 아레나 (풀스크린) -->
+  <div class="arena" id="arena" aria-hidden="true">
+    <div class="arena__bg" aria-hidden="true"></div>
+    <div class="arena__inner">
+      <div class="arena__hud">
+        <button class="btn3d btn3d--red btn3d--icon" id="quitBtn" aria-label="그만하기">✕</button>
+        <div class="arena__stage" id="arenaStage">STAGE 1</div>
+        <div class="arena__hudright">
+          <div class="chip chip--gold">🪙 <b id="arenaScore">0</b></div>
+          <div class="chip chip--fire" id="arenaCombo">🔥 x0</div>
+        </div>
+      </div>
+
+      <div class="progress" aria-hidden="true"><div class="progress__fill" id="progressFill"></div></div>
+      <div class="qcount" id="qCount">문제 1 / 10</div>
+
+      <div class="timer" aria-hidden="true">
+        <div class="timer__fill" id="timerFill"></div>
+        <span class="timer__num" id="timerNum">15</span>
+      </div>
+
+      <div class="stage-view" id="stageView"><!-- 문제 / 결과 화면 --></div>
+    </div>
+
+    <!-- 해설 패널 -->
+    <div class="feedback" id="feedback" role="dialog" aria-live="polite">
+      <div class="feedback__box" id="feedbackBox">
+        <div class="feedback__emoji" id="fbEmoji">🎉</div>
+        <div class="feedback__title" id="fbTitle">정답이에요!</div>
+        <div class="feedback__answer" id="fbAnswer"></div>
+        <p class="feedback__exp" id="fbExp"></p>
+        <button class="btn3d btn3d--green" id="nextBtn">다음 문제 ▶</button>
+      </div>
+    </div>
+
+    <!-- 카운트다운 -->
+    <div class="countdown" id="countdown"><span id="countNum">3</span></div>
+  </div>
+
+  <!-- 팝업 효과 레이어 -->
+  <div class="fx-layer" id="fxLayer" aria-hidden="true"></div>
+  <canvas id="confetti" aria-hidden="true"></canvas>
+
+  <!-- 맨위 버튼 -->
+  <button class="to-top" id="toTop" aria-label="맨 위로 이동">⬆<span>맨위</span></button>
+
+  <script src="script.js"></script>
+</body>
+</html>
