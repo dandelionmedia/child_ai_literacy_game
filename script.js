@@ -299,7 +299,49 @@ const Sound = (() => {
       const n = [[523, 0, .12], [523, .13, .12], [523, .26, .12], [659, .39, .45], [587, .86, .2], [659, 1.06, .2], [784, 1.26, .7]];
       n.forEach(([f, d, l]) => { tone(f, l, 'square', 0.08, d); tone(f / 2, l, 'triangle', 0.08, d); });
     },
-    start() { tone(220, 0.35, 'sawtooth', 0.06, 0, 880); noise(0.35, 0.05, 0, 2000); }
+    start() { tone(220, 0.35, 'sawtooth', 0.06, 0, 880); noise(0.35, 0.05, 0, 2000); },
+    whoosh() { noise(0.35, 0.12, 0, 1800); tone(300, 0.3, 'sine', 0.05, 0, 900); },
+    perfect() { [1047, 1319, 1568, 2093].forEach((f, i) => tone(f, 0.12, 'triangle', 0.09, 0.05 + i * 0.05)); },
+    fever() { [523, 659, 784, 1047, 784, 1047, 1319, 1568].forEach((f, i) => tone(f, 0.1, 'square', 0.07, i * 0.06)); noise(0.5, 0.06, 0, 4000); },
+    bossHit() { noise(0.2, 0.3, 0, 600); tone(180, 0.2, 'square', 0.12, 0, 60); },
+    bossAttack() { tone(90, 0.5, 'sawtooth', 0.12, 0, 40); noise(0.4, 0.2, 0.05, 250); },
+    bossDie() { [880, 784, 659, 523, 392, 262].forEach((f, i) => tone(f, 0.12, 'square', 0.08, i * 0.08)); noise(0.8, 0.25, 0.4, 500); },
+    sparkle() { tone(1800 + Math.random() * 800, 0.08, 'sine', 0.04); },
+    pause() { tone(660, 0.12, 'square', 0.08); tone(440, 0.2, 'square', 0.08, 0.12); },
+    play: tone,
+    hat: noise,
+    now() { const c = ac(); return c ? c.currentTime : 0; }
+  };
+})();
+
+/* ---------- 배경음악 (8비트 칩튠, 직접 합성) ---------- */
+const Music = (() => {
+  let timer = null, step = 0, nextAt = 0, tempo = 136, playing = false;
+  // 코드 진행: Am - F - C - G
+  const bass = [110, 110, 87.31, 87.31, 130.81, 130.81, 98, 98];
+  const arps = [
+    [440, 523, 659, 523], [349, 440, 523, 440], [392, 523, 659, 523], [392, 494, 587, 494]
+  ];
+  const melody = [659, 0, 784, 659, 587, 0, 523, 0, 523, 0, 587, 659, 784, 0, 659, 0];
+  function tick() {
+    const now = Sound.now();
+    while (nextAt < now + 0.15) {
+      const d = nextAt - now;
+      const bar = Math.floor(step / 8) % 4;
+      const s8 = step % 8;
+      if (s8 % 2 === 0) Sound.play(bass[bar * 2 + (s8 >= 4 ? 1 : 0)], 0.22, 'triangle', 0.07, Math.max(0, d));
+      Sound.play(arps[bar][s8 % 4] * 2, 0.08, 'square', 0.018, Math.max(0, d));
+      const m = melody[step % 16];
+      if (m && step % 64 >= 32) Sound.play(m, 0.16, 'square', 0.025, Math.max(0, d));
+      if (s8 % 2 === 1) Sound.hat(0.04, 0.03, Math.max(0, d), 7000);
+      nextAt += 60 / tempo / 2;
+      step++;
+    }
+  }
+  return {
+    start() { if (playing) return; playing = true; step = 0; nextAt = Sound.now() + 0.1; timer = setInterval(tick, 40); },
+    stop() { playing = false; clearInterval(timer); timer = null; },
+    fever(on) { tempo = on ? 176 : 136; }
   };
 })();
 
@@ -369,19 +411,84 @@ async function openStage(id) {
   if (!stage) return;
   G.stage = stage;
   G.qs = stage.boss ? buildBoss() : stage.qs.slice();
-  Object.assign(G, { i: 0, score: 0, combo: 0, maxCombo: 0, correct: 0, log: [], locked: true });
+  Object.assign(G, { i: 0, score: 0, combo: 0, maxCombo: 0, correct: 0, log: [], locked: true, fever: false, paused: false });
+  G.bossHp = G.qs.length;
 
   arena.style.setProperty('--stage-c', stage.color);
-  $('#arenaStage').textContent = `${stage.boss ? 'BOSS' : 'STAGE ' + stage.no} · ${stage.title}`;
-  arena.classList.remove('result-mode');
+  $('#arenaStage').innerHTML = `${stage.boss ? 'BOSS' : 'STAGE ' + stage.no} · ${stage.title}<span class="fever-tag">FEVER x2</span>`;
+  arena.classList.remove('result-mode', 'fever');
   arena.classList.add('open'); arena.setAttribute('aria-hidden', 'false');
   arena.scrollTop = 0;
   document.body.classList.add('no-scroll');
   view.innerHTML = '';
+  // 보스 패널
+  const bp = $('#bossPanel');
+  bp.hidden = !stage.boss;
+  $('#bossMonster').className = 'boss__monster';
+  updateBoss();
   updateHud();
+  Music.fever(false);
+  say(stage.boss ? '보스가 나타났다! 정답으로 공격해! ⚔️' : `${save.nick || '탐정'}님, 준비됐나요? 가 보자고! 🚀`);
   Sound.start();
   await countdown();
+  if (!G.paused) Music.start();
   showQuestion();
+}
+
+/* ---------- 마스코트 ---------- */
+const LINES = {
+  start: ['할 수 있어! 천천히 읽어 봐요 📖', '문제를 끝까지 읽는 사람이 진짜 탐정! 🔍', '집중! 집중! 🎯', '이번 문제도 맞혀 볼까? 😎', '오늘 배운 거 생각나죠? 💡'],
+  good: ['우와! 천재 탐정이다! 🤩', '정답! 박수 짝짝짝 👏', '역시 오늘 수업 잘 들었구나! 🌟', '최고야! 이 기세로 계속! 🚀', '완벽해! 선생님도 깜짝! 😲'],
+  bad: ['괜찮아! 해설 보면 바로 알게 돼요 💪', '틀려도 괜찮아, 배우는 중이야! 🌱', '아까워~ 다음엔 꼭 맞힐 거야! 🍀', '해설을 읽으면 진짜 실력이 쑥쑥! 📚'],
+  hurry: ['서둘러요! 시간이 얼마 안 남았어! ⏰', '3초! 2초! 빨리빨리! 🏃'],
+  fever: ['피버 타임!! 점수 2배다!! 🔥🔥', '불타오른다~! 계속 맞혀! 🔥'],
+  boss: ['보스에게 큰 타격! 💥', '보스가 비틀거려요! 계속 공격! ⚔️'],
+  bossHit: ['으악! 보스의 반격! 다음엔 막아 보자! 🛡️']
+};
+const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+function say(text, mood = '') {
+  const m = $('#mascot'); const b = $('#mascotSay');
+  b.textContent = text;
+  b.classList.remove('talk'); void b.offsetWidth; b.classList.add('talk');
+  m.classList.remove('happy', 'sad'); void m.offsetWidth;
+  if (mood) m.classList.add(mood);
+  $('#mascotBody').textContent = mood === 'happy' ? '🤩' : mood === 'sad' ? '😵' : (G.fever ? '😎' : '🤖');
+}
+function updateBoss() {
+  const total = G.qs.length || 1;
+  $('#bossHp').style.width = `${(G.bossHp / total) * 100}%`;
+  $('#bossHpText').textContent = `HP ${G.bossHp}/${total}`;
+}
+function bossReact(hit) {
+  const mon = $('#bossMonster');
+  mon.classList.remove('hit', 'attack'); void mon.offsetWidth;
+  if (hit) {
+    G.bossHp = Math.max(0, G.bossHp - 1); updateBoss();
+    mon.classList.add(G.bossHp === 0 ? 'dead' : 'hit');
+    G.bossHp === 0 ? Sound.bossDie() : Sound.bossHit();
+    const r = mon.getBoundingClientRect();
+    popAt('-1 💥', r.left + r.width / 2, r.top);
+  } else {
+    mon.classList.add('attack'); Sound.bossAttack();
+  }
+}
+
+/* ---------- 라운드 배너 ---------- */
+async function roundBanner(text) {
+  const rb = $('#roundBanner'); const t = $('#roundText');
+  t.textContent = text; t.style.animation = 'none'; void t.offsetWidth; t.style.animation = '';
+  rb.classList.add('show'); Sound.whoosh();
+  await sleep(900);
+  rb.classList.remove('show');
+}
+
+/* ---------- 판정 글자 ---------- */
+function judge(kind) {
+  const el = document.createElement('div');
+  el.className = 'judge ' + kind;
+  el.textContent = { perfect: 'PERFECT!', great: 'GREAT!', good: 'GOOD!', miss: 'MISS...' }[kind];
+  $('#fxLayer').appendChild(el);
+  setTimeout(() => el.remove(), 1050);
 }
 
 function buildBoss() {
@@ -406,6 +513,10 @@ async function countdown() {
 
 function closeArena() {
   stopTimer();
+  Music.stop();
+  G.locked = true; G.paused = false;
+  $('#pause').classList.remove('open');
+  arena.classList.remove('fever');
   arena.classList.remove('open'); arena.setAttribute('aria-hidden', 'true');
   $('#feedback').classList.remove('open');
   document.body.classList.remove('no-scroll');
@@ -422,10 +533,20 @@ function updateHud() {
 }
 
 /* ---------- 문제 화면 ---------- */
-function showQuestion() {
+async function showQuestion() {
   const q = G.qs[G.i];
-  G.locked = false;
+  G.locked = true;
   updateHud();
+  view.innerHTML = '';
+  $('#timerFill').style.transform = 'scaleX(1)';
+  $('#timerNum').textContent = q.time || G.stage.time;
+  $('.timer').classList.remove('danger');
+  const last = G.i === G.qs.length - 1;
+  await roundBanner(last ? 'FINAL ROUND!' : `ROUND ${G.i + 1}`);
+  while (G.paused) await sleep(200);
+  if (!arena.classList.contains('open')) return;
+  say(pick(G.fever ? LINES.fever : LINES.start));
+  G.locked = false;
 
   const top = q.art ? `<div class="qcard__art">${q.art}</div>`
             : q.news ? '' : `<div class="qcard__emoji">${q.emoji || '❓'}</div>`;
@@ -545,22 +666,47 @@ function markButtons(wrap, chosen, right, ok) {
 function startTimer(sec) {
   stopTimer();
   G.timeMax = sec * 1000; G.timeLeft = G.timeMax; G.lastTick = sec + 1;
+  $('#timerFill').parentElement.classList.remove('danger');
+  $('#timerFill').style.transform = 'scaleX(1)'; $('#timerNum').textContent = sec;
+  runTimer();
+}
+function runTimer() {
   const fill = $('#timerFill'); const num = $('#timerNum'); const box = fill.parentElement;
-  box.classList.remove('danger');
-  let last = performance.now();
+  let last = null;
   const loop = (now) => {
+    if (last === null) last = now;
     G.timeLeft -= (now - last); last = now;
     const ratio = Math.max(0, G.timeLeft / G.timeMax);
     fill.style.transform = `scaleX(${ratio})`;
     const s = Math.ceil(G.timeLeft / 1000);
     num.textContent = Math.max(0, s);
-    if (s <= 3 && s > 0 && s < G.lastTick) { Sound.tick(); box.classList.add('danger'); }
+    if (s <= 5 && s > 0 && s < G.lastTick) {
+      Sound.tick(); box.classList.add('danger');
+      if (s === 5) say(pick(LINES.hurry));
+    }
     G.lastTick = s;
     if (G.timeLeft <= 0) { G.timer = null; onTimeout(); return; }
     G.timer = requestAnimationFrame(loop);
   };
-  fill.style.transform = 'scaleX(1)'; num.textContent = sec;
   G.timer = requestAnimationFrame(loop);
+}
+function pauseGame() {
+  if (!arena.classList.contains('open') || arena.classList.contains('result-mode') || G.paused) return;
+  G.paused = true;
+  const wasRunning = !!G.timer;
+  stopTimer();
+  G.resumeTimer = wasRunning;
+  Music.stop(); Sound.pause();
+  $('#pause').classList.add('open');
+  setTimeout(() => $('#resumeBtn').focus({ preventScroll: true }), 50);
+}
+function resumeGame() {
+  if (!G.paused) return;
+  G.paused = false;
+  $('#pause').classList.remove('open');
+  Music.start();
+  if (G.resumeTimer && !G.locked) runTimer();
+  say('좋아요! 다시 집중! 🎯');
 }
 function stopTimer() { if (G.timer) cancelAnimationFrame(G.timer); G.timer = null; }
 
@@ -588,26 +734,43 @@ function finish(ok, answerText, srcEl, timeout = false) {
   if (ok) {
     G.combo++; G.correct++;
     G.maxCombo = Math.max(G.maxCombo, G.combo);
-    const speed = Math.round((G.timeLeft / G.timeMax) * 50);
+    const tr = G.timeLeft / G.timeMax;
+    const kind = tr > 0.6 ? 'perfect' : tr > 0.3 ? 'great' : 'good';
+    const speed = Math.round(tr * 50);
     gained = 100 + speed + Math.min(G.combo - 1, 5) * 20;
     if (G.stage.boss) gained = Math.round(gained * 1.5);
+    if (G.fever) gained *= 2;
     G.score += gained;
     Sound.correct();
+    if (kind === 'perfect') Sound.perfect();
+    judge(kind);
     flash('good');
     popText(`+${gained}`, srcEl);
-    if (G.combo >= 3) setTimeout(() => { Sound.combo(); popText(`🔥 ${G.combo} COMBO!`, null, true); }, 250);
-    burstConfetti(40, srcEl);
+    burstConfetti(kind === 'perfect' ? 70 : 40, srcEl);
+    say(pick(G.stage.boss ? LINES.boss : LINES.good), 'happy');
+    if (G.stage.boss) setTimeout(() => bossReact(true), 300);
+    // 피버 타임 진입 (5연속 정답)
+    if (G.combo >= 5 && !G.fever) {
+      G.fever = true; arena.classList.add('fever'); Music.fever(true);
+      setTimeout(() => { Sound.fever(); popText('🔥 FEVER TIME! 점수 2배! 🔥', null, true); say(pick(LINES.fever), 'happy'); burstConfetti(120); }, 500);
+    } else if (G.combo >= 3) {
+      setTimeout(() => { Sound.combo(); popText(`🔥 ${G.combo} COMBO!`, null, true); }, 300);
+    }
   } else {
+    if (G.fever) { G.fever = false; arena.classList.remove('fever'); Music.fever(false); }
     G.combo = 0;
     timeout ? Sound.timeout() : Sound.wrong();
+    judge('miss');
     flash('bad');
+    say(G.stage.boss ? pick(LINES.bossHit) : pick(LINES.bad), 'sad');
+    if (G.stage.boss) setTimeout(() => bossReact(false), 200);
     $('.arena__inner').classList.remove('shake-screen'); void $('.arena__inner').offsetWidth;
     $('.arena__inner').classList.add('shake-screen');
   }
   G.log.push({ q: q.q, ok });
   updateHud();
 
-  setTimeout(() => showFeedback(ok, answerText, q.exp, timeout), ok ? 750 : 900);
+  setTimeout(() => showFeedback(ok, answerText, q.exp, timeout), ok ? 1100 : 1100);
 }
 
 function showFeedback(ok, answerText, exp, timeout) {
@@ -637,6 +800,8 @@ function nextQuestion() {
 /* ---------- 결과 화면 ---------- */
 async function showResult() {
   stopTimer();
+  Music.stop();
+  arena.classList.remove('fever');
   arena.classList.add('result-mode');
   $('#progressFill').style.width = '100%';
   const total = G.qs.length;
@@ -653,14 +818,19 @@ async function showResult() {
   const nick = save.nick || '꼬마 탐정';
   const idx = ALL_STAGES.indexOf(s);
   const nextStage = ALL_STAGES[idx + 1];
+  const grade = (G.correct === total) ? 'S' : stars === 3 ? 'A' : stars === 2 ? 'B' : 'C';
+  const gradeName = { S: '전설', A: '최고', B: '훌륭', C: '도전' }[grade];
+  const bossMsg = s.boss ? (G.bossHp === 0 ? '💥 가짜뉴스 대마왕 격파! 💥' : `대마왕 HP ${G.bossHp} 남음! 다시 도전해서 물리치자!`) : '';
   const msg = stars === 3 ? '완벽해요! 오늘 배운 내용을 정말 잘 기억하고 있어요! 🙌'
             : stars === 2 ? '잘했어요! 틀린 문제 해설을 한 번 더 읽어 보면 별 3개도 문제없어요!'
             : '괜찮아요! 틀리면서 배우는 거예요. 다시 도전하면 더 잘할 수 있어요! 💪';
 
   view.innerHTML = `
     <div class="result">
+      <div class="grade-stamp ${grade}">${grade}<small>${gradeName}</small></div>
       <div class="result__trophy">${stars === 3 ? '🏆' : stars === 2 ? '🥈' : '🎖️'}</div>
       <div class="result__title">STAGE CLEAR!</div>
+      ${bossMsg ? `<div class="result__bossmsg">${bossMsg}</div>` : ''}
       <div class="result__player">플레이어 「${escapeHTML(nick)}」</div>
       <div class="result__stars"><span>⭐</span><span>⭐</span><span>⭐</span></div>
       <div class="result__nums">
@@ -691,6 +861,7 @@ async function showResult() {
   Sound.fanfare();
   burstConfetti(160);
 
+  setTimeout(() => Sound.stamp(), 50);
   // 별 하나씩 등장
   const starEls = view.querySelectorAll('.result__stars span');
   for (let i = 0; i < stars; i++) {
@@ -716,10 +887,17 @@ function popText(text, srcEl, big = false) {
   const el = document.createElement('div');
   el.className = 'fx-pop' + (big ? ' combo' : '');
   el.textContent = text;
-  let x = window.innerWidth / 2, y = window.innerHeight * (big ? 0.35 : 0.45);
+  let x = window.innerWidth / 2, y = window.innerHeight * (big ? 0.58 : 0.45);
   if (srcEl && !big) { const r = srcEl.getBoundingClientRect(); x = r.left + r.width / 2; y = r.top; }
   el.style.left = x + 'px'; el.style.top = y + 'px';
   layer.appendChild(el);
+  setTimeout(() => el.remove(), 1200);
+}
+function popAt(text, x, y) {
+  const el = document.createElement('div');
+  el.className = 'fx-pop'; el.textContent = text;
+  el.style.left = x + 'px'; el.style.top = y + 'px';
+  $('#fxLayer').appendChild(el);
   setTimeout(() => el.remove(), 1200);
 }
 function flash(kind) {
@@ -769,8 +947,18 @@ function init() {
   // 모든 3D 버튼 클릭음 + 오디오 잠금 해제
   document.addEventListener('pointerdown', (e) => {
     Sound.unlock();
-    if (e.target.closest('.btn3d, .chip--btn, .to-top')) Sound.click();
+    if (e.target.closest('.btn3d, .chip--btn, .to-top')) {
+      Sound.click();
+      // 버튼을 누른 자리에서 반짝이 톡!
+      const pt = { getBoundingClientRect: () => ({ left: e.clientX, top: e.clientY, width: 0, height: 0 }) };
+      burstConfetti(12, pt);
+    }
   }, { passive: true });
+
+  // 잠깐 멈추기 (선생님 집중 신호)
+  $('#pauseBtn').addEventListener('click', pauseGame);
+  $('#resumeBtn').addEventListener('click', resumeGame);
+  document.addEventListener('visibilitychange', () => { if (document.hidden) pauseGame(); });
 
   // 게임 시작
   $('#startBtn').addEventListener('click', () => {
@@ -796,12 +984,16 @@ function init() {
 
   // 그만하기
   $('#quitBtn').addEventListener('click', () => {
-    if (arena.classList.contains('result-mode') || confirm('게임을 그만할까요?\n지금 스테이지 점수는 저장되지 않아요.')) closeArena();
+    if (arena.classList.contains('result-mode')) { closeArena(); return; }
+    const wasPaused = G.paused; if (!wasPaused) pauseGame();
+    if (confirm('게임을 그만할까요?\n지금 스테이지 점수는 저장되지 않아요.')) closeArena();
+    else if (!wasPaused) resumeGame();
   });
 
   // 키보드: 1~4 숫자키로 보기 선택, O/X 키
   document.addEventListener('keydown', (e) => {
-    if (!arena.classList.contains('open') || G.locked) return;
+    if (arena.classList.contains('open') && (e.key === 'p' || e.key === 'P' || e.key === 'Escape')) { G.paused ? resumeGame() : pauseGame(); return; }
+    if (!arena.classList.contains('open') || G.locked || G.paused) return;
     const wrap = view.querySelector('.answers-wrap'); if (!wrap) return;
     const btns = [...wrap.querySelectorAll('.answers button')];
     const k = e.key.toLowerCase();
@@ -833,6 +1025,7 @@ function init() {
   $('#muteBtn').addEventListener('click', () => {
     const m = Sound.toggle();
     $('#muteBtn').textContent = m ? '🔇' : '🔊';
+    $('#muteBtn').setAttribute('aria-label', m ? '효과음·배경음악 켜기' : '효과음·배경음악 끄기');
   });
 
   // 맨위 버튼

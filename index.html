@@ -45,6 +45,7 @@
         </div>
         <p class="player-card__tip">🔒 진짜 이름 말고 <b>별명</b>을 써요! (AI 약속 1번: 내 정보는 비밀!)</p>
       </div>
+      <p class="press-start">▶ PRESS START ◀</p>
     </div>
   </section>
 
@@ -119,9 +120,11 @@
   <!-- 게임 아레나 (풀스크린) -->
   <div class="arena" id="arena" aria-hidden="true">
     <div class="arena__bg" aria-hidden="true"></div>
+    <div class="arena__stars" aria-hidden="true"><i></i><i></i></div>
     <div class="arena__inner">
       <div class="arena__hud">
         <button class="btn3d btn3d--red btn3d--icon" id="quitBtn" aria-label="그만하기">✕</button>
+        <button class="btn3d btn3d--blue btn3d--icon" id="pauseBtn" aria-label="잠깐 멈추기">⏸</button>
         <div class="arena__stage" id="arenaStage">STAGE 1</div>
         <div class="arena__hudright">
           <div class="chip chip--gold">🪙 <b id="arenaScore">0</b></div>
@@ -134,10 +137,39 @@
 
       <div class="timer" aria-hidden="true">
         <div class="timer__fill" id="timerFill"></div>
+        <span class="timer__bomb" id="timerBomb">⏰</span>
         <span class="timer__num" id="timerNum">25</span>
       </div>
 
+      <!-- 응원 마스코트 -->
+      <div class="mascot" id="mascot" aria-live="polite">
+        <div class="mascot__body" id="mascotBody">🤖</div>
+        <div class="mascot__bubble" id="mascotSay">준비됐나요? 가 보자고!</div>
+      </div>
+
+      <!-- 보스 체력바 (보스전에서만) -->
+      <div class="boss" id="bossPanel" hidden>
+        <div class="boss__monster" id="bossMonster">👾</div>
+        <div class="boss__info">
+          <div class="boss__name">가짜뉴스 대마왕 <span id="bossHpText">HP 12/12</span></div>
+          <div class="boss__hp"><div class="boss__hpfill" id="bossHp"></div></div>
+        </div>
+      </div>
+
       <div class="stage-view" id="stageView"><!-- 문제 / 결과 화면 --></div>
+    </div>
+
+    <!-- 라운드 배너 -->
+    <div class="round-banner" id="roundBanner"><span id="roundText">ROUND 1</span></div>
+
+    <!-- 일시정지 -->
+    <div class="pause" id="pause">
+      <div class="pause__box">
+        <div class="pause__eyes">👀</div>
+        <div class="pause__title">잠깐! 멈춤!</div>
+        <p class="pause__msg">화면에서 손을 떼고<br><b>선생님을 봐 주세요!</b></p>
+        <button class="btn3d btn3d--green" id="resumeBtn">다시 시작 ▶</button>
+      </div>
     </div>
 
     <!-- 해설 패널 -->

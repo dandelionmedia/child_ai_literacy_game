@@ -13,3 +13,10 @@ AI콘텐츠마케팅연구소 유쌤클래스 · 친절한유성쌤 김유성
 ## 깃허브 Pages 올리기
 index.html, style.css, script.js 세 파일을 저장소 최상단에 올리고
 Settings → Pages → Branch: main / (root) → Save
+
+## v2 업데이트 (게임 분위기 강화)
+- 8비트 배경음악, ROUND 배너, PERFECT/GREAT/GOOD 판정
+- 응원 마스코트 말풍선, 5연속 정답 FEVER TIME(점수 2배)
+- 보스전: 가짜뉴스 대마왕 HP바, 정답=공격 / 오답=반격
+- 결과 등급 도장(S·A·B·C), 버튼 반짝이 효과
+- ⏸ 잠깐 멈춤: "선생님을 봐 주세요!" 화면 (키보드 P/Esc)

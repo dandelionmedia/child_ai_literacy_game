@@ -487,3 +487,146 @@ body.no-scroll .to-top { display: none; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
+
+/* =========================================================
+   v2 다이나믹 업그레이드: 마스코트 · 보스 HP · 피버 · 판정 · 일시정지
+   ========================================================= */
+
+/* 히어로: PRESS START 깜빡임 + 시작 버튼 맥박 */
+.press-start { margin-top: 22px; font-family: var(--font-game); font-size: clamp(1.3rem, 3vw, 1.8rem); color: var(--yellow); letter-spacing: .15em; animation: blinkTxt 1s steps(2, start) infinite; text-shadow: 0 0 14px rgba(255,210,63,.8); }
+@keyframes blinkTxt { to { visibility: hidden; } }
+#startBtn { animation: glowPulse 1.4s ease-in-out infinite; }
+@keyframes glowPulse { 0%,100% { box-shadow: 0 8px 0 var(--d), 0 14px 22px rgba(0,0,0,.4), 0 0 0 0 rgba(255,210,63,.7); } 50% { box-shadow: 0 8px 0 var(--d), 0 14px 22px rgba(0,0,0,.4), 0 0 0 14px rgba(255,210,63,0); } }
+
+/* 스테이지 카드 도전 버튼도 살짝 숨쉬기 */
+.stage-card .btn3d { animation: breathe 2.2s ease-in-out infinite; }
+@keyframes breathe { 50% { filter: brightness(1.12); } }
+
+/* 아레나 우주 배경 (흐르는 별) */
+.arena__stars { position: fixed; inset: 0; pointer-events: none; overflow: hidden; }
+.arena__stars i { position: absolute; inset: -100% 0 0 0; height: 200%;
+  background-image:
+    radial-gradient(2px 2px at 20px 30px, #fff, transparent),
+    radial-gradient(2px 2px at 140px 80px, #ffd23f, transparent),
+    radial-gradient(1.5px 1.5px at 260px 160px, #fff, transparent),
+    radial-gradient(2px 2px at 330px 40px, #2ee6d6, transparent),
+    radial-gradient(1.5px 1.5px at 80px 200px, #ff4d8d, transparent);
+  background-size: 360px 240px; animation: starFall 9s linear infinite; opacity: .7; }
+.arena__stars i:nth-child(2) { background-size: 220px 180px; animation-duration: 5s; opacity: .45; }
+@keyframes starFall { to { transform: translateY(50%); } }
+.arena.fever .arena__stars i { animation-duration: 1.6s; }
+
+/* HUD 버튼 */
+.arena__hud #pauseBtn { --c: var(--blue); --d: var(--blue-d); --t: #fff; }
+
+/* 타이머 폭탄 */
+.timer__bomb { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); font-size: 1.2rem; }
+.timer.danger .timer__bomb { animation: bombShake .25s infinite; }
+@keyframes bombShake { 0%,100% { transform: translateY(-50%) rotate(-15deg) scale(1.2); } 50% { transform: translateY(-50%) rotate(15deg) scale(1.4); } }
+.timer.danger { box-shadow: 0 0 18px rgba(255,90,95,.8); }
+
+/* 마스코트 */
+.mascot { display: flex; align-items: center; gap: 12px; margin: 14px 0 0; min-height: 64px; }
+.mascot__body { flex: none; width: 64px; height: 64px; border-radius: 20px; display: grid; place-items: center; font-size: 2.6rem;
+  background: linear-gradient(180deg, #4a3fa0, #2a2170); border: 3px solid var(--stage-c, var(--cyan)); box-shadow: 0 5px 0 rgba(0,0,0,.35); animation: bob 1.8s ease-in-out infinite; }
+.mascot__bubble { position: relative; background: #fff; color: #23184f; font-family: var(--font-game); font-size: clamp(1.15rem, 2.8vw, 1.45rem);
+  padding: 10px 16px; border-radius: 18px; box-shadow: 0 4px 0 rgba(0,0,0,.3); line-height: 1.3; }
+.mascot__bubble::before { content: ''; position: absolute; left: -10px; top: 50%; transform: translateY(-50%); border: 10px solid transparent; border-right-color: #fff; border-left: 0; }
+.mascot__bubble.talk { animation: talk .45s cubic-bezier(.2,1.8,.4,1); }
+@keyframes talk { from { transform: scale(.6); opacity: 0; } }
+.mascot.happy .mascot__body { animation: jump .6s ease-out; border-color: var(--green); }
+.mascot.sad .mascot__body { animation: shake .45s; border-color: var(--red); }
+@keyframes jump { 30% { transform: translateY(-26px) rotate(-12deg) scale(1.15); } 60% { transform: translateY(0) rotate(8deg); } }
+.arena.result-mode .mascot, .arena.result-mode .boss { display: none; }
+
+/* 보스 패널 */
+.boss { display: flex; align-items: center; gap: 14px; margin-top: 14px; padding: 12px 16px; border-radius: 20px;
+  background: linear-gradient(90deg, #4a0f2a, #2a1f6e); border: 3px solid var(--red); box-shadow: 0 6px 0 var(--red-d); }
+.boss[hidden] { display: none; }
+.boss__monster { font-size: clamp(3rem, 9vw, 4.4rem); line-height: 1; animation: bossIdle 1.2s ease-in-out infinite; filter: drop-shadow(0 0 12px rgba(255,90,95,.8)); }
+@keyframes bossIdle { 50% { transform: translateY(-6px) scale(1.06); } }
+.boss__monster.hit { animation: bossHit .5s; }
+@keyframes bossHit { 0% { filter: brightness(3) drop-shadow(0 0 20px #fff); transform: scale(1.3) rotate(-15deg); } 40% { transform: translateX(14px) rotate(10deg); } 70% { transform: translateX(-10px); } }
+.boss__monster.attack { animation: bossAttack .6s; }
+@keyframes bossAttack { 40% { transform: scale(1.6) translateY(10px); } }
+.boss__monster.dead { animation: bossDead 1.2s forwards; }
+@keyframes bossDead { to { transform: scale(0) rotate(720deg); opacity: 0; } }
+.boss__info { flex: 1; }
+.boss__name { font-family: var(--font-game); font-size: clamp(1.15rem, 2.8vw, 1.45rem); display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.boss__name span { color: var(--yellow); }
+.boss__hp { height: 22px; border-radius: 99px; background: rgba(0,0,0,.4); overflow: hidden; border: 2px solid rgba(255,255,255,.3); margin-top: 6px; }
+.boss__hpfill { height: 100%; width: 100%; background: linear-gradient(90deg, #ff2e63, #ff9f3d); transition: width .5s cubic-bezier(.2,1.4,.4,1); }
+
+/* 라운드 배너 */
+.round-banner { position: fixed; inset: 0; z-index: 125; display: none; place-items: center; pointer-events: none; }
+.round-banner.show { display: grid; }
+.round-banner span { font-family: var(--font-game); font-size: clamp(3.4rem, 14vw, 7rem); color: #fff; padding: 6px 60px;
+  background: linear-gradient(90deg, transparent, var(--stage-c, var(--pink)) 20%, var(--stage-c, var(--pink)) 80%, transparent);
+  text-shadow: 0 5px 0 rgba(0,0,0,.35); width: 100%; text-align: center; animation: sweep .9s cubic-bezier(.2,.9,.3,1) forwards; }
+@keyframes sweep { 0% { transform: translateX(-110%) skewX(-20deg); } 30%, 70% { transform: translateX(0) skewX(-8deg); } 100% { transform: translateX(110%) skewX(-20deg); } }
+
+/* 보기 버튼 순서대로 등장 */
+.answers .btn3d { animation: btnIn .45s cubic-bezier(.2,1.6,.4,1) backwards; }
+.answers .btn3d:nth-child(2) { animation-delay: .08s; }
+.answers .btn3d:nth-child(3) { animation-delay: .16s; }
+.answers .btn3d:nth-child(4) { animation-delay: .24s; }
+.answers .btn3d:nth-child(5) { animation-delay: .32s; }
+.answers .btn3d:nth-child(6) { animation-delay: .40s; }
+@keyframes btnIn { from { transform: translateY(40px) scale(.7); opacity: 0; } }
+.answers .btn3d.correct { animation: pop .5s; }
+.answers .btn3d.wrong { animation: shake .45s; }
+
+/* 판정 글자 */
+.judge { position: absolute; left: 50%; top: 38%; transform: translate(-50%, -50%); font-family: var(--font-game);
+  font-size: clamp(3.6rem, 14vw, 7rem); white-space: nowrap; animation: judgeIn 1s cubic-bezier(.2,1.6,.4,1) forwards; -webkit-text-stroke: 3px #23184f; paint-order: stroke fill; }
+.judge.perfect { color: var(--yellow); text-shadow: 0 0 30px rgba(255,210,63,.9), 0 8px 0 #7a4f00; }
+.judge.great   { color: var(--cyan);   text-shadow: 0 0 30px rgba(46,230,214,.9), 0 8px 0 #0f6f68; }
+.judge.good    { color: var(--green);  text-shadow: 0 0 30px rgba(61,220,132,.9), 0 8px 0 #1c6b3e; }
+.judge.miss    { color: var(--red);    text-shadow: 0 0 30px rgba(255,90,95,.9), 0 8px 0 #6b1013; }
+@keyframes judgeIn { 0% { transform: translate(-50%, -50%) scale(3); opacity: 0; } 25% { transform: translate(-50%, -50%) scale(.9); opacity: 1; } 35% { transform: translate(-50%, -50%) scale(1.05); } 80% { opacity: 1; } 100% { transform: translate(-50%, -80%) scale(1); opacity: 0; } }
+
+/* 피버 타임 */
+.arena.fever .arena__bg { background: conic-gradient(from var(--fa, 0deg), #ff4d8d55, #ffd23f55, #2ee6d655, #9b6bff55, #ff4d8d55); animation: feverSpin 3s linear infinite; }
+@property --fa { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+@keyframes feverSpin { to { --fa: 360deg; } }
+.arena.fever .qcard { box-shadow: 0 10px 0 #23184f, 0 0 0 6px var(--yellow), 0 0 40px rgba(255,210,63,.8); }
+.arena.fever .chip--fire { background: linear-gradient(90deg, var(--pink), var(--orange), var(--yellow)); color: #3b1d00; animation: pulse .6s infinite; }
+.fever-tag { display: none; font-family: var(--font-game); background: linear-gradient(90deg, var(--pink), var(--orange)); color: #fff; padding: 2px 12px; border-radius: 999px; margin-left: 8px; font-size: 1rem; animation: pulse .6s infinite; }
+.arena.fever .fever-tag { display: inline-block; }
+
+/* 일시정지 */
+.pause { position: fixed; inset: 0; z-index: 145; display: none; place-items: center; background: rgba(8,5,30,.92); padding: 20px; }
+.pause.open { display: grid; }
+.pause__box { text-align: center; animation: cardIn .4s cubic-bezier(.2,1.6,.4,1); }
+.pause__eyes { font-size: clamp(6rem, 22vw, 10rem); line-height: 1; animation: lookAround 1.6s ease-in-out infinite; }
+@keyframes lookAround { 0%,100% { transform: translateX(-14px); } 50% { transform: translateX(14px); } }
+.pause__title { font-family: var(--font-game); font-size: clamp(3rem, 12vw, 5rem); color: var(--yellow); text-shadow: 0 6px 0 var(--yellow-d); }
+.pause__msg { font-family: var(--font-game); font-size: clamp(1.5rem, 4.5vw, 2.2rem); margin: 10px 0 26px; line-height: 1.4; }
+
+/* 결과 등급 도장 */
+.result { position: relative; }
+.grade-stamp { position: absolute; top: 16px; right: 16px; width: clamp(90px, 22vw, 130px); height: clamp(90px, 22vw, 130px); border-radius: 50%;
+  display: grid; place-items: center; font-family: var(--font-game); font-size: clamp(3.2rem, 10vw, 5rem); line-height: 1;
+  border: 6px solid currentColor; transform: rotate(-14deg); animation: stampIn .45s cubic-bezier(.2,2,.4,1) backwards; background: rgba(0,0,0,.25); }
+.grade-stamp small { display: block; font-size: .9rem; text-align: center; margin-top: -6px; }
+.grade-stamp.S { color: var(--yellow); text-shadow: 0 0 20px var(--yellow); }
+.grade-stamp.A { color: var(--cyan); }
+.grade-stamp.B { color: var(--green); }
+.grade-stamp.C { color: var(--orange); }
+@keyframes stampIn { from { transform: rotate(-14deg) scale(4); opacity: 0; } }
+.result__bossmsg { font-family: var(--font-game); font-size: clamp(1.5rem, 4vw, 2rem); color: var(--pink); margin-bottom: 6px; }
+
+/* 정답 해설 박스 등장 시 정답 버튼 강조 */
+.btn3d.correct { box-shadow: 0 8px 0 var(--d), 0 0 0 5px #fff, 0 0 30px rgba(61,220,132,.9) !important; }
+
+@media (max-width: 560px) {
+  .mascot__body { width: 54px; height: 54px; font-size: 2.1rem; }
+  .boss { padding: 10px 12px; }
+  .arena__hud { gap: 6px; }
+  .arena__hud .btn3d--icon { width: 46px; min-height: 46px; font-size: 1.2rem; }
+  .arena__stage { font-size: 1rem; }
+  .grade-stamp { top: 10px; right: 10px; }
+}
+.fx-pop.combo { white-space: normal; width: 92vw; text-align: center; line-height: 1.15; }
+.arena.fever .fever-tag { display: table; margin: 4px auto 0; }
+.result__bossmsg { margin-top: 6px; }
