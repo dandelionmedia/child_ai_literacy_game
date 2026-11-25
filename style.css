@@ -630,3 +630,44 @@ body.no-scroll .to-top { display: none; }
 .fx-pop.combo { white-space: normal; width: 92vw; text-align: center; line-height: 1.15; }
 .arena.fever .fever-tag { display: table; margin: 4px auto 0; }
 .result__bossmsg { margin-top: 6px; }
+
+/* =========================================================
+   v2.1 모바일 잘림 수정 (좁은 화면·큰 글씨 설정 기기 대응)
+   ========================================================= */
+html, body { max-width: 100%; overflow-x: hidden; }
+@supports (overflow: clip) { html, body { overflow-x: clip; } }
+.hero { grid-template-columns: minmax(0, 1fr); }
+.hero__inner, .player-card, .player-card__row, .section, .arena__inner, .qcard, .result { min-width: 0; max-width: 100%; }
+.player-card { max-width: 640px; }
+.player-card input { min-width: 0; width: 100%; }
+.hero__badge { max-width: 100%; overflow-wrap: anywhere; }
+.hero__lead, .player-card__tip, .qcard__q, .news__title { overflow-wrap: anywhere; }
+.topbar__stats { min-width: 0; flex-wrap: nowrap; }
+
+@media (max-width: 480px) {
+  .hero { padding: 36px 14px 70px; min-height: auto; }
+  .hero__badge { font-size: 0.95rem; padding: 6px 12px; }
+  .neon { font-size: clamp(2.4rem, 13vw, 3.4rem); }
+  .hero__lead { font-size: 1.1rem; }
+  .hero__lead br { display: none; }
+  .player-card { padding: 16px; }
+  .player-card__label { font-size: 1.15rem; }
+  .player-card input { font-size: 1.15rem; min-height: 54px; padding: 0 14px; }
+  .player-card .btn3d { flex-basis: 100%; }
+  .player-card__tip { font-size: 0.92rem; }
+  .press-start { font-size: 1.1rem; letter-spacing: .08em; }
+  .hero__floaters span { font-size: 1.8rem; opacity: .55; }
+  .topbar { padding: 8px 10px; }
+  .chip { font-size: 0.95rem; padding: 4px 9px; gap: 4px; }
+  .chip--btn { font-size: 1.1rem; padding: 3px 9px; }
+  .section__title { font-size: 1.8rem; }
+}
+.shout-card, .howto-card, .stage-card, .badge, .promise-list li, .fact-steps li, .answers .btn3d, .feedback__box { min-width: 0; }
+@media (max-width: 560px) {
+  .arena__hud { flex-wrap: wrap; }
+  .arena__stage { order: 3; flex: 1 1 100%; font-size: 1.05rem; line-height: 1.3; }
+  .arena__hudright { margin-left: auto; }
+  .news__head { flex-wrap: wrap; gap: 4px; }
+  .mascot__bubble { font-size: 1.05rem; }
+  .qcard { padding: 18px 14px; }
+}
